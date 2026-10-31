@@ -1,0 +1,4 @@
+repository "Aquaroid/Aquaroid@20067000983708@cloud"
+  path "/"
+    br "/main"
+    co "/main"
