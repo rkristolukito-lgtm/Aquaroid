@@ -50,7 +50,7 @@ public class BulletRewardManager : MonoBehaviour
             BulletData randomBullet = GetRandomBulletData();
             
             int index = i;
-            choiceButtonTexts[i].text = $"New: {randomBullet.bulletName} ({randomBullet.type})";
+            choiceButtonTexts[i].text = $"{randomBullet.type}";
             
             choiceButtons[i].onClick.RemoveAllListeners();
             choiceButtons[i].onClick.AddListener(() => OnBulletChosen(randomBullet));
@@ -104,7 +104,7 @@ public class BulletRewardManager : MonoBehaviour
             if (i < BulletInventory.Instance.chamberSlots.Length)
             {
                 BulletData currentBullet = BulletInventory.Instance.chamberSlots[i];
-                chamberSlotTexts[i].text = $"Slot {i + 1}: {currentBullet.bulletName}";
+                chamberSlotTexts[i].text = $"{currentBullet.bulletName}";
 
                 int slotIndex = i;
                 chamberSlotButtons[i].onClick.RemoveAllListeners();

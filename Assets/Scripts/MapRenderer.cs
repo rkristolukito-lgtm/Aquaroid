@@ -4,10 +4,11 @@ using TMPro;
 
 public class MapRenderer : MonoBehaviour
 {
-    public GameObject nodeButtonPrefab; // Drag your MapNodeButtonPrefab here
-    public Transform mapPanelContainer; // Drag your UI panel named "map" here
+    public GameObject nodeButtonPrefab; 
+    public Transform mapPanelContainer; 
 
-    void Start()
+    // Use OnEnable instead of Start so it refreshes every time you return to the map scene
+    void OnEnable()
     {
         RenderMap();
     }
@@ -23,7 +24,6 @@ public class MapRenderer : MonoBehaviour
 
         foreach (var node in MapManager.Instance.allNodes)
         {
-            // Keep Da'at hidden until unlocked[cite: 4]
             if (node.type == NodeType.DaatSecret && !MapManager.Instance.daatUnlocked)
                 continue;
 

@@ -33,6 +33,9 @@ public class MapManager : MonoBehaviour
     
     public bool daatUnlocked = false;
 
+    // Static flag so it survives scene loads and forces generation to unlock everything for testing
+    public static bool debugUnlockAllPending = false;
+
     void Awake()
     {
         if (Instance == null) 
@@ -56,9 +59,9 @@ public class MapManager : MonoBehaviour
         allNodes.Clear();
         visitedPath.Clear();
 
-        // 1. Create nodes with their corresponding Sephirot numbers (10 to 1)[cite: 1]
+        // 1. Create nodes with their corresponding Sephirot numbers
         MapNode malkuth   = new MapNode { nodeName = "10. Malkuth", type = NodeType.Malkhut, sephiraNumber = 10, isUnlocked = true, uiPosition = new Vector2(0, -360) };
-        MapNode yesod     = new MapNode { nodeName = "9. Yesod",    type = NodeType.Yesod,   sephiraNumber = 9,  uiPosition = new Vector2(0, -280) };
+        MapNode yesod     = new MapNode { nodeName = "9. Yesod",    type = NodeType.Yesod,   sephiraNumber = 9,  isUnlocked = false, uiPosition = new Vector2(0, -280) };
         MapNode hod       = new MapNode { nodeName = "8. Hod",      type = NodeType.HodNezach, sephiraNumber = 8, uiPosition = new Vector2(-140, -180) };
         MapNode netzach   = new MapNode { nodeName = "7. Netzach",  type = NodeType.HodNezach, sephiraNumber = 7, uiPosition = new Vector2(140, -180) };
         MapNode tiphareth = new MapNode { nodeName = "6. Tiphareth", type = NodeType.Tiferet, sephiraNumber = 6, uiPosition = new Vector2(0, -80) };
@@ -72,7 +75,7 @@ public class MapManager : MonoBehaviour
         MapNode chokhmah  = new MapNode { nodeName = "2. Chokhmah", type = NodeType.BinahHochmah, sephiraNumber = 2, uiPosition = new Vector2(140, 220) };
         MapNode kether    = new MapNode { nodeName = "1. Kether",   type = NodeType.Keter,   sephiraNumber = 1, uiPosition = new Vector2(0, 320) };
 
-        // 2. Link Pathworking (Zig-zag lightning flash path)[cite: 1]
+        // 2. Link Pathworking (Zig-zag lightning flash path)
         malkuth.connectedNextNodes.Add(yesod);
         
         yesod.connectedNextNodes.Add(hod);
@@ -97,25 +100,64 @@ public class MapManager : MonoBehaviour
 
         chokhmah.connectedNextNodes.Add(kether);
 
-        // Secret Abyss route if unlocked via the exact lightning path
-        if (daatUnlocked)
+        // Secret Abyss route if unlocked via the exact lightning path or debug flag
+        if (daatUnlocked || debugUnlockAllPending)
         {
             kether.connectedNextNodes.Add(daat);
         }
 
         allNodes.AddRange(new MapNode[] { malkuth, yesod, hod, netzach, tiphareth, geburah, chesed, daat, binah, chokhmah, kether });
         
-        currentNode = malkuth;
-        visitedPath.Add(malkuth.sephiraNumber); 
+        // 3. Handle Debug Unlock vs Normal Start State
+        if (debugUnlockAllPending)
+        {
+            daatUnlocked = true;
+            foreach (var node in allNodes)
+            {
+                node.isUnlocked = true;
+            }
+            currentNode = null;
+            Debug.Log("DEBUG: All nodes forced unlocked during map generation.");
+        }
+        else
+        {
+            // Leave currentNode null at the start so Malkuth is green/selectable instead of yellow
+            currentNode = null; 
+        }
     }
 
     public void SelectNode(MapNode nextNode)
     {
-        if (currentNode.connectedNextNodes.Contains(nextNode) || nextNode.isUnlocked)
+        // If debug unlock is active or it's the start of a normal run picking Malkuth
+        if (debugUnlockAllPending || (currentNode == null && nextNode.isUnlocked))
+        {
+            currentNode = nextNode;
+            visitedPath.Add(nextNode.sephiraNumber);
+            LoadSceneForNodeType(nextNode.type);
+            return;
+        }
+
+        // Standard movement logic for subsequent nodes
+        if (currentNode != null && (currentNode.connectedNextNodes.Contains(nextNode) || nextNode.isUnlocked))
         {
             currentNode = nextNode;
             visitedPath.Add(nextNode.sephiraNumber); 
             LoadSceneForNodeType(nextNode.type);
+        }
+    }
+
+    // Call this when all enemies are cleared in a combat room
+    public void CompleteCurrentNode()
+    {
+        if (currentNode != null)
+        {
+            currentNode.isCompleted = true;
+
+            // Automatically unlock all connected next nodes so the player can progress
+            foreach (var nextNode in currentNode.connectedNextNodes)
+            {
+                nextNode.isUnlocked = true;
+            }
         }
     }
 
@@ -146,8 +188,15 @@ public class MapManager : MonoBehaviour
 
     public void ResetRunPath()
     {
+        debugUnlockAllPending = false;
         visitedPath.Clear();
         daatUnlocked = false;
+        GenerateKabbalahMap();
+    }
+
+    public void UnlockAllNodesForTesting()
+    {
+        debugUnlockAllPending = true;
         GenerateKabbalahMap();
     }
 }

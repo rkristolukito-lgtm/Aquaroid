@@ -11,14 +11,46 @@ public class MainMenuManager : MonoBehaviour
             BulletInventory.Instance.ResetChamberToDefault();
         }
 
-        // 2. Reset Map progress / Da'at state if MapManager exists
+        // 2. Ensure MapManager exists, then reset run path
+        EnsureMapManagerExists();
         if (MapManager.Instance != null)
         {
-            MapManager.Instance.daatUnlocked = false;
+            MapManager.Instance.ResetRunPath();
         }
 
-        // 3. Load your first Combat Room (or Kabbalah Map if run starts from map)
-        SceneManager.LoadScene("CombatRoomScene"); 
+        // 3. Open the Kabbalah Map scene first
+        SceneManager.LoadScene("KabbalahMapScene"); 
+    }
+
+    // --- DEBUG TESTING METHOD ---
+    public void StartDebugFullMap()
+    {
+        if (BulletInventory.Instance != null)
+        {
+            BulletInventory.Instance.ResetChamberToDefault();
+        }
+
+        // Enable static debug unlock flag
+        MapManager.debugUnlockAllPending = true;
+
+        EnsureMapManagerExists();
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.UnlockAllNodesForTesting();
+        }
+
+        SceneManager.LoadScene("KabbalahMapScene");
+    }
+
+    // Helper to spawn a MapManager on the fly if it's missing from the Main Menu
+    private void EnsureMapManagerExists()
+    {
+        if (MapManager.Instance == null)
+        {
+            GameObject managerObj = new GameObject("MapManager_AutoSpawned");
+            managerObj.AddComponent<MapManager>();
+            Debug.Log("MapManager was missing from Main Menu. Auto-spawned a fresh instance.");
+        }
     }
 
     public void QuitGame()

@@ -16,8 +16,11 @@ public class MapNodeButton : MonoBehaviour
         if (nodeNameText != null) 
             nodeNameText.text = node.nodeName;
 
-        bool isSelectable = MapManager.Instance.currentNode.connectedNextNodes.Contains(node) || node.isUnlocked;
+        bool isCurrent = (node == MapManager.Instance.currentNode);
         
+        // A node is selectable if it's unlocked (or if no current node is selected yet at the start)
+        bool isSelectable = node.isUnlocked && !isCurrent;
+
         if (buttonComponent != null)
         {
             buttonComponent.interactable = isSelectable;
@@ -27,12 +30,14 @@ public class MapNodeButton : MonoBehaviour
 
         if (nodeImage != null)
         {
-            if (node == MapManager.Instance.currentNode) 
-                nodeImage.color = Color.yellow; 
-            else if (isSelectable) 
-                nodeImage.color = Color.green;  
+            if (isCurrent) 
+                nodeImage.color = Color.yellow; // Active room you are on
+            else if (node.isCompleted)
+                nodeImage.color = Color.blue;   // Beaten nodes
+            else if (node.isUnlocked) 
+                nodeImage.color = Color.green;  // Unlocked / Debug test available
             else 
-                nodeImage.color = Color.gray;   
+                nodeImage.color = Color.gray;   // Locked
         }
     }
 

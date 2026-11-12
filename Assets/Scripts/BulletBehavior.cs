@@ -85,16 +85,41 @@ public class BulletBehavior : MonoBehaviour
         {
             if (hit.CompareTag("Enemy"))
             {
-                Destroy(hit.gameObject); // AOE damage/destroy
+                // Call Die() instead of raw Destroy so the GameManager counts the kill properly!
+                Enemy enemyScript = hit.GetComponent<Enemy>();
+                if (enemyScript != null)
+                {
+                    enemyScript.Die();
+                }
+                else
+                {
+                    Destroy(hit.gameObject); // Fallback if script is missing
+                }
             }
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy") || collision.CompareTag("Projectile"))
+        // Standard, Splitter, and Explosive bullets only trigger on Enemies
+        if (type != BulletType.Shockwave)
         {
-            OnImpact(transform.position);
+            if (collision.CompareTag("Enemy"))
+            {
+                OnImpact(transform.position);
+            }
+        }
+        else
+        {
+            // Shockwave Bullet Logic:
+            if (collision.CompareTag("Enemy"))
+            {
+                OnImpact(transform.position);
+            }
+            else if (collision.CompareTag("Projectile"))
+            {
+                Destroy(collision.gameObject);
+            }
         }
     }
 }

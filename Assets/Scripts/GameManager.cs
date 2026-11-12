@@ -49,17 +49,24 @@ public class GameManager : MonoBehaviour
     public void NotifyEnemyDefeated()
     {
         if (levelFinished) return;
-        
         levelFinished = true;
-        Debug.Log("--- ALL ENEMIES DEFEATED ---");
 
+        // Mark the current Sephirot node as completed/unlocked on the map
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.CompleteCurrentNode();
+        }
+
+        Debug.Log("Room cleared! Opening reward screen.");
+        
+        // Open your bullet reward manager or fallback to map scene
+        BulletRewardManager rewardManager = FindFirstObjectByType<BulletRewardManager>();
         if (rewardManager != null)
         {
             rewardManager.OpenRewardScreen();
         }
         else
         {
-            Debug.LogWarning("RewardManager is NULL on GameManager! Falling back to map.");
             SceneManager.LoadScene("KabbalahMapScene");
         }
     }

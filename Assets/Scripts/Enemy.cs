@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour
     public ParticleSystem destroyedParticles;
     private Transform player;
     public GameManager gameManager;
+    private bool isDead = false;
 
     void Start()
     {
@@ -30,7 +31,6 @@ public class Enemy : MonoBehaviour
         {
             gameManager = FindFirstObjectByType<GameManager>();
         }
-
     }
 
     void Update()
@@ -38,7 +38,7 @@ public class Enemy : MonoBehaviour
         // If the player has been destroyed (died), stop running the enemy AI
         if (player == null) return;
 
-        // --- YOUR EXISTING MOVEMENT CODE ---
+        // --- MOVEMENT CODE ---
         if (Vector2.Distance(transform.position, player.position) > stoppingDistance)
         {
             transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
@@ -52,7 +52,7 @@ public class Enemy : MonoBehaviour
             transform.position = Vector2.MoveTowards(transform.position, player.position, -speed * Time.deltaTime);
         }
 
-        // --- YOUR EXISTING SHOOTING CODE ---
+        // --- SHOOTING CODE ---
         if (timeBtwShots <= 0)
         {
             Instantiate(projectile, transform.position, Quaternion.identity);
@@ -69,25 +69,32 @@ public class Enemy : MonoBehaviour
         if (collision.CompareTag("Bullet"))
         {
             Destroy(collision.gameObject);
-            
-            if (gameManager != null)
-            {
-                gameManager.enemyCount--; // Simply decrease by 1
-                Debug.Log($"Enemy destroyed. Remaining enemies: {gameManager.enemyCount}");
-
-                // Trigger victory the exact moment it hits 0
-                if (gameManager.enemyCount <= 0)
-                {
-                    gameManager.NotifyEnemyDefeated();
-                }
-            }
-
-            if (destroyedParticles != null)
-            {
-                Instantiate(destroyedParticles, transform.position, Quaternion.identity);
-            }
-            
-            Destroy(gameObject);
+            Die(); // Use shared death logic
         }
+    }
+
+    // Public method so Explosive bullets (or other systems) can cleanly kill the enemy and update the count
+    public void Die()
+    {
+        if (isDead) return; // Prevent double-counting if multiple bullets hit on the exact same frame
+        isDead = true;
+
+        if (gameManager != null)
+        {
+            gameManager.enemyCount--; 
+            Debug.Log($"Enemy destroyed. Remaining enemies: {gameManager.enemyCount}");
+
+            if (gameManager.enemyCount <= 0)
+            {
+                gameManager.NotifyEnemyDefeated();
+            }
+        }
+
+        if (destroyedParticles != null)
+        {
+            Instantiate(destroyedParticles, transform.position, Quaternion.identity);
+        }
+        
+        Destroy(gameObject);
     }
 }
