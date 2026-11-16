@@ -20,6 +20,11 @@ public class MapNodeButton : MonoBehaviour
         
         // A node is selectable if it's unlocked (or if no current node is selected yet at the start)
         bool isSelectable = node.isUnlocked && !isCurrent;
+        if (node.isCompleted)
+        {
+            nodeImage.color = Color.blue;
+            buttonComponent.interactable = MapManager.debugUnlockAllPending; // Locked during normal runs, clickable in debug mode
+        }
 
         if (buttonComponent != null)
         {
@@ -39,6 +44,7 @@ public class MapNodeButton : MonoBehaviour
             else 
                 nodeImage.color = Color.gray;   // Locked
         }
+        
     }
 
     private void OnNodeClicked()

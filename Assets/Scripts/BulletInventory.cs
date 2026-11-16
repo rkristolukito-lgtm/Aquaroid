@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BulletInventory : MonoBehaviour
 {
@@ -25,6 +26,7 @@ public class BulletInventory : MonoBehaviour
     {
         InitializeDefaultChamber();
     }
+    
 
     void InitializeDefaultChamber()
     {
@@ -110,5 +112,25 @@ public class BulletInventory : MonoBehaviour
                 bulletPrefab = null
             };
         }
+    }
+    void OnEnable()
+    {
+        // Listen to scene load events
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        // Clean up listener
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Automatically reset the shot index to the first bullet when entering any new level/room scene
+        // (Ensures you start every combat node with a fresh chamber index without wiping your custom bullet inventory)
+        currentShotIndex = 0;
+        isReloading = false;
+        Debug.Log("New level entered: Chamber shot index reset to 0.");
     }
 }

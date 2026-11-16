@@ -8,6 +8,8 @@ TagManager:
   - Asteroid
   - Projectile
   - Enemy
+  - Shield
+  - Wall
   layers:
   - Default
   - TransparentFX

@@ -128,6 +128,12 @@ public class MapManager : MonoBehaviour
 
     public void SelectNode(MapNode nextNode)
     {
+        // Prevent re-entering already completed (blue) nodes unless debugging
+        if (nextNode.isCompleted && !debugUnlockAllPending)
+        {
+            return;
+        }
+
         // If debug unlock is active or it's the start of a normal run picking Malkuth
         if (debugUnlockAllPending || (currentNode == null && nextNode.isUnlocked))
         {
@@ -152,11 +158,15 @@ public class MapManager : MonoBehaviour
         if (currentNode != null)
         {
             currentNode.isCompleted = true;
+            currentNode.isUnlocked = false; // Lock the completed node
 
             // Automatically unlock all connected next nodes so the player can progress
             foreach (var nextNode in currentNode.connectedNextNodes)
             {
-                nextNode.isUnlocked = true;
+                if (!nextNode.isCompleted) // Only unlock nodes that haven't been beaten yet
+                {
+                    nextNode.isUnlocked = true;
+                }
             }
         }
     }
@@ -178,12 +188,7 @@ public class MapManager : MonoBehaviour
 
     void LoadSceneForNodeType(NodeType type)
     {
-        if (type == NodeType.Keter) 
-            UnityEngine.SceneManagement.SceneManager.LoadScene("BossScene");
-        else if (type == NodeType.DaatSecret) 
-            UnityEngine.SceneManagement.SceneManager.LoadScene("SecretDaatScene");
-        else 
-            UnityEngine.SceneManagement.SceneManager.LoadScene("CombatRoomScene"); 
+        UnityEngine.SceneManagement.SceneManager.LoadScene("CombatRoomScene"); 
     }
 
     public void ResetRunPath()

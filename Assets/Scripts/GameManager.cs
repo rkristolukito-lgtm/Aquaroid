@@ -39,10 +39,22 @@ public class GameManager : MonoBehaviour
         }
         
         levelFinished = false;
-        enemyCount = 6; // Fixed baseline count
         playerLives = maxLives; // Reset lives to 10 at the start of every level/room
+
+        // Dynamically find how many enemies the spawner created for this specific level
+        CombatEnemySpawner spawner = FindFirstObjectByType<CombatEnemySpawner>();
+        if (spawner != null)
+        {
+            // If you want enemyCount to match the exact roster size generated:
+            // (Note: Since enemies spawn staggered over time, we look at the target count or list size)
+            enemyCount = spawner.targetEnemyCount; 
+        }
+        else
+        {
+            enemyCount = 6; // Fallback default
+        }
         
-        Debug.Log($"GameManager initialized. Enemy target set to 6. Lives reset to: {playerLives}");
+        Debug.Log($"GameManager initialized. Enemy target set to: {enemyCount}. Lives reset to: {playerLives}");
     }
 
     // Call this from your Enemy script when its HP hits 0

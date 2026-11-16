@@ -5,9 +5,9 @@ using System.Collections;
 public class CombatEnemySpawner : MonoBehaviour
 {
     [Header("Enemy Prefabs by Tier")]
-    public GameObject[] basicEnemies;     // Malkuth & Yesod
-    public GameObject[] midTierEnemies;   // Hod, Netzach, Tiphareth
-    public GameObject[] eliteEnemies;     // Geburah, Chesed, Binah, Chokhmah
+    public GameObject[] basicEnemies;     
+    public GameObject[] midTierEnemies;   
+    public GameObject[] eliteEnemies;     
     public GameObject bossPrefab;         // Keter
 
     [Header("Spawn Settings")]
@@ -32,60 +32,106 @@ public class CombatEnemySpawner : MonoBehaviour
         NodeType type = MapManager.Instance.currentNode != null ? MapManager.Instance.currentNode.type : NodeType.Malkhut;
 
         // 1. Kether Boss Stage
-        if (type == NodeType.Keter)
+        if (type == NodeType.Keter || sephira == 1)
         {
             if (bossPrefab != null) Instantiate(bossPrefab, transform.position, Quaternion.identity);
             yield break;
         }
 
-        // 2. Select the correct pool based on Sephira tier
-        GameObject[] activePool = basicEnemies;
+        List<GameObject> enemiesToSpawn = new List<GameObject>();
+
+        // 2. Build precise enemy lists based on Sephira number/type
         if (type == NodeType.DaatSecret)
         {
-            // Daat secret gauntlet pool
-            List<GameObject> daatList = new List<GameObject>();
-            if (basicEnemies.Length > 0) daatList.Add(basicEnemies[Random.Range(0, basicEnemies.Length)]);
-            if (midTierEnemies.Length > 0) daatList.Add(midTierEnemies[Random.Range(0, midTierEnemies.Length)]);
-            if (eliteEnemies.Length > 0) daatList.Add(eliteEnemies[Random.Range(0, eliteEnemies.Length)]);
-            activePool = daatList.ToArray();
+            // Da'at secret gauntlet pool
+            if (basicEnemies.Length > 0) enemiesToSpawn.Add(basicEnemies[Random.Range(0, basicEnemies.Length)]);
+            if (midTierEnemies.Length > 0) enemiesToSpawn.Add(midTierEnemies[Random.Range(0, midTierEnemies.Length)]);
+            if (eliteEnemies.Length > 0) enemiesToSpawn.Add(eliteEnemies[Random.Range(0, eliteEnemies.Length)]);
         }
-        else if (sephira >= 9) activePool = basicEnemies;
-        else if (sephira >= 6) activePool = midTierEnemies;
-        else activePool = eliteEnemies;
-
-        if (activePool == null || activePool.Length == 0)
+        else
         {
-            Debug.LogError("Enemy pool is empty! Assign prefabs in the Inspector.");
+            switch (sephira)
+            {
+                case 10: // Malkuth: 4 Basics
+                    AddRandomEnemies(basicEnemies, 4, enemiesToSpawn);
+                    break;
+                case 9: // Yesod: 6 Basics
+                    AddRandomEnemies(basicEnemies, 6, enemiesToSpawn);
+                    break;
+                case 8: // Hod: 4 Basics, 2 Mids
+                    AddRandomEnemies(basicEnemies, 4, enemiesToSpawn);
+                    AddRandomEnemies(midTierEnemies, 2, enemiesToSpawn);
+                    break;
+                case 7: // Netzach: 2 Basics, 4 Mids
+                    AddRandomEnemies(basicEnemies, 2, enemiesToSpawn);
+                    AddRandomEnemies(midTierEnemies, 4, enemiesToSpawn);
+                    break;
+                case 6: // Tiphareth: 6 Mids
+                    AddRandomEnemies(midTierEnemies, 6, enemiesToSpawn);
+                    break;
+                case 5: // Geburah: 4 Basics, 2 Elites
+                    AddRandomEnemies(basicEnemies, 4, enemiesToSpawn);
+                    AddRandomEnemies(eliteEnemies, 2, enemiesToSpawn);
+                    break;
+                case 4: // Chesed: 3 Mids, 3 Elites
+                    AddRandomEnemies(midTierEnemies, 3, enemiesToSpawn);
+                    AddRandomEnemies(eliteEnemies, 3, enemiesToSpawn);
+                    break;
+                case 3: // Binah: 1 Basic, 1 Mid, 4 Elites
+                    AddRandomEnemies(basicEnemies, 1, enemiesToSpawn);
+                    AddRandomEnemies(midTierEnemies, 1, enemiesToSpawn);
+                    AddRandomEnemies(eliteEnemies, 4, enemiesToSpawn);
+                    break;
+                case 2: // Chokhmah: 6 Elites
+                    AddRandomEnemies(eliteEnemies, 6, enemiesToSpawn);
+                    break;
+                default:
+                    AddRandomEnemies(basicEnemies, 6, enemiesToSpawn);
+                    break;
+            }
+        }
+
+        if (enemiesToSpawn.Count == 0)
+        {
+            Debug.LogError("Enemy spawn list is empty! Check pool assignments in the Inspector.");
             yield break;
         }
 
-        // 3. Staggered Spawning: 2 on start, then +1 every second up to target (6)
-        int spawnedCount = 0;
+        // Sync target count with the exact generated roster size
+        targetEnemyCount = enemiesToSpawn.Count;
 
-        // Spawn initial 2 enemies immediately
-        for (int i = 0; i < 2; i++)
+        // 3. Staggered Spawning: Spawn initial batch (up to 2), then drip +1 every second
+        int spawnedCount = 0;
+        int initialSpawnCount = Mathf.Min(2, enemiesToSpawn.Count);
+
+        for (int i = 0; i < initialSpawnCount; i++)
         {
-            SpawnSingleEnemy(activePool);
+            SpawnEnemyPrefab(enemiesToSpawn[spawnedCount]);
             spawnedCount++;
         }
 
-        // Drip 1 enemy per second until we hit targetEnemyCount (6)
-        while (spawnedCount < targetEnemyCount)
+        while (spawnedCount < enemiesToSpawn.Count)
         {
             yield return new WaitForSeconds(1f);
-            SpawnSingleEnemy(activePool);
+            SpawnEnemyPrefab(enemiesToSpawn[spawnedCount]);
             spawnedCount++;
         }
     }
 
-    void SpawnSingleEnemy(GameObject[] enemyPool)
+    void AddRandomEnemies(GameObject[] sourcePool, int count, List<GameObject> targetList)
     {
-        GameObject randomPrefab = enemyPool[Random.Range(0, enemyPool.Length)];
-        Vector3 spawnPos = GetValidSpawnPosition();
+        if (sourcePool == null || sourcePool.Length == 0) return;
+        for (int i = 0; i < count; i++)
+        {
+            targetList.Add(sourcePool[Random.Range(0, sourcePool.Length)]);
+        }
+    }
 
-        GameObject spawnedEnemy = Instantiate(randomPrefab, spawnPos, Quaternion.identity);
+    void SpawnEnemyPrefab(GameObject prefab)
+    {
+        Vector3 spawnPos = GetValidSpawnPosition();
+        GameObject spawnedEnemy = Instantiate(prefab, spawnPos, Quaternion.identity);
         
-        // Link back to GameManager active count
         Enemy enemyScript = spawnedEnemy.GetComponent<Enemy>();
         if (enemyScript != null && GameManager.Instance != null)
         {
@@ -95,19 +141,26 @@ public class CombatEnemySpawner : MonoBehaviour
 
     Vector3 GetValidSpawnPosition()
     {
-        Vector3 spawnPos = transform.position;
+        Vector3 spawnPos = Vector3.zero;
         Transform player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
         int safetyAttempts = 0;
         bool positionFound = false;
 
+        // Define strict boundary limits based on your arena walls (inside the box)
+        float minX = -7.5f;
+        float maxX = 7.5f;
+        float minY = -4.0f;
+        float maxY = 4.0f;
+
         while (!positionFound && safetyAttempts < 15)
         {
             safetyAttempts++;
 
-            // Pick a random point near the edges of the camera viewport or offset area
-            Vector2 randomOffset = new Vector2(Random.Range(-6f, 6f), Random.Range(-4f, 4f));
-            spawnPos = transform.position + (Vector3)randomOffset;
+            // Generate a random position strictly within the arena bounds
+            float randomX = Random.Range(minX, maxX);
+            float randomY = Random.Range(minY, maxY);
+            spawnPos = new Vector3(randomX, randomY, 0f);
 
             // If player exists, ensure the enemy isn't spawning right on top of them
             if (player != null)
