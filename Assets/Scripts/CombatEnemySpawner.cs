@@ -32,6 +32,7 @@ public class CombatEnemySpawner : MonoBehaviour
         NodeType type = MapManager.Instance.currentNode != null ? MapManager.Instance.currentNode.type : NodeType.Malkhut;
 
         // 1. Kether Boss Stage
+        // 1. Kether Boss Stage
         if (type == NodeType.Keter || sephira == 1)
         {
             if (bossPrefab != null) Instantiate(bossPrefab, transform.position, Quaternion.identity);
@@ -43,6 +44,12 @@ public class CombatEnemySpawner : MonoBehaviour
         // 2. Build precise enemy lists based on Sephira number/type
         if (type == NodeType.DaatSecret)
         {
+            // Spawn the boss in Da'at (remove this block if Da'at should only spawn the gauntlet below)
+            if (bossPrefab != null)
+            {
+                Instantiate(bossPrefab, transform.position, Quaternion.identity);
+            }
+
             // Da'at secret gauntlet pool
             if (basicEnemies.Length > 0) enemiesToSpawn.Add(basicEnemies[Random.Range(0, basicEnemies.Length)]);
             if (midTierEnemies.Length > 0) enemiesToSpawn.Add(midTierEnemies[Random.Range(0, midTierEnemies.Length)]);

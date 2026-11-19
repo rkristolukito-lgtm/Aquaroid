@@ -5,11 +5,11 @@ public class SnakeBossController : MonoBehaviour
 {
     public GameObject segmentPrefab;
     public int totalSegments = 6;
-    public float segmentSpacing = 0.8f; 
-    public float moveSpeed = 4f;        
+    public float segmentSpacing = 0.8f;
+    public float moveSpeed = 4f;
 
     private List<SnakeSegment> activeSegments = new List<SnakeSegment>();
-    
+
     // Wandering variables
     private Vector2 currentWanderTarget;
     private float wanderTimer = 0f;
@@ -34,11 +34,11 @@ public class SnakeBossController : MonoBehaviour
         {
             Vector3 spawnPos = transform.position - new Vector3(0, i * segmentSpacing, 0);
             GameObject segObj = Instantiate(segmentPrefab, spawnPos, Quaternion.identity);
-            
+
             SnakeSegment segment = segObj.GetComponent<SnakeSegment>();
             segment.segmentIndex = i;
             segment.bossController = this;
-            
+
             activeSegments.Add(segment);
         }
     }
@@ -100,7 +100,7 @@ public class SnakeBossController : MonoBehaviour
         bool hasWrapped = false;
         if (viewportPosition.x < 0) { moveAdjustment.x = 1; hasWrapped = true; }
         else if (viewportPosition.x > 1) { moveAdjustment.x = -1; hasWrapped = true; }
-        
+
         if (viewportPosition.y < 0) { moveAdjustment.y = 1; hasWrapped = true; }
         else if (viewportPosition.y > 1) { moveAdjustment.y = -1; hasWrapped = true; }
 
@@ -142,6 +142,17 @@ public class SnakeBossController : MonoBehaviour
         if (activeSegments.Count == 0)
         {
             Debug.Log("Kether Defeated!");
+
+            if (MapManager.Instance != null)
+            {
+                MapManager.Instance.CompleteCurrentNode();
+            }
+
+            GameManager gm = FindFirstObjectByType<GameManager>();
+            if (gm != null)
+            {
+                gm.NotifyEnemyDefeated();
+            }
         }
     }
 }

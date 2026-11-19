@@ -106,28 +106,37 @@ public class BulletBehavior : MonoBehaviour
         Collider2D[] hits = Physics2D.OverlapCircleAll(position, explosionRadius);
         foreach (var hit in hits)
         {
-            // Do not let explosions trigger on the shield object directly
             if (hit.CompareTag("Shield")) continue;
 
             if (hit.CompareTag("Enemy"))
             {
+                Enemy basicEnemy = hit.GetComponent<Enemy>();
+                if (basicEnemy != null)
+                {
+                    basicEnemy.TakeDamage(1);
+                    continue;
+                }
+
+                MidTierEnemy midTier = hit.GetComponent<MidTierEnemy>();
+                if (midTier != null)
+                {
+                    midTier.TakeDamage(1);
+                    continue;
+                }
+
+                SnakeSegment snakeSegment = hit.GetComponent<SnakeSegment>();
+                if (snakeSegment != null)
+                {
+                    snakeSegment.TakeDamage(1);
+                    continue;
+                }
+
                 EliteEnemy elite = hit.GetComponent<EliteEnemy>();
                 if (elite != null)
                 {
                     elite.Die();
                     continue;
                 }
-
-                // MidTierEnemy is intentionally omitted here so explosions pass through them safely
-
-                Enemy enemyScript = hit.GetComponent<Enemy>();
-                if (enemyScript != null)
-                {
-                    enemyScript.Die();
-                    continue;
-                }
-
-                Destroy(hit.gameObject);
             }
         }
     }

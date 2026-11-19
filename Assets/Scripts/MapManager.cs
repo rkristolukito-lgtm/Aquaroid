@@ -8,7 +8,7 @@ public class MapNode
 {
     public string nodeName;
     public NodeType type;
-    public int sephiraNumber; // 1 to 10 (or 0 for Da'at)
+    public int sephiraNumber; // 10 down to 1 (or 0 for Da'at)
     
     [System.NonSerialized] 
     public List<MapNode> connectedNextNodes = new List<MapNode>();
@@ -103,7 +103,10 @@ public class MapManager : MonoBehaviour
         // Secret Abyss route if unlocked via the exact lightning path or debug flag
         if (daatUnlocked || debugUnlockAllPending)
         {
-            kether.connectedNextNodes.Add(daat);
+            if (!kether.connectedNextNodes.Contains(daat))
+            {
+                kether.connectedNextNodes.Add(daat);
+            }
         }
 
         allNodes.AddRange(new MapNode[] { malkuth, yesod, hod, netzach, tiphareth, geburah, chesed, daat, binah, chokhmah, kether });
@@ -168,6 +171,33 @@ public class MapManager : MonoBehaviour
                     nextNode.isUnlocked = true;
                 }
             }
+
+            // When Kether (1) is completed, check if the player followed 10 -> 1 in order
+            if (currentNode.type == NodeType.Keter || currentNode.sephiraNumber == 1)
+            {
+                if (CheckLightningPathCondition())
+                {
+                    UnlockDaatNode();
+                }
+            }
+        }
+    }
+
+    private void UnlockDaatNode()
+    {
+        daatUnlocked = true;
+
+        MapNode kether = allNodes.Find(n => n.type == NodeType.Keter || n.sephiraNumber == 1);
+        MapNode daat = allNodes.Find(n => n.type == NodeType.DaatSecret);
+
+        if (daat != null && !daat.isCompleted)
+        {
+            daat.isUnlocked = true;
+        }
+
+        if (kether != null && daat != null && !kether.connectedNextNodes.Contains(daat))
+        {
+            kether.connectedNextNodes.Add(daat);
         }
     }
 

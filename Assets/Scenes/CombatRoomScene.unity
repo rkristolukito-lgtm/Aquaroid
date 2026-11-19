@@ -154,7 +154,7 @@ MonoBehaviour:
   - {fileID: 4252181609974613378, guid: 560d4c64c8d71c84aa023144b29541f5, type: 3}
   eliteEnemies:
   - {fileID: 6868789739702543086, guid: e6cb71c63b0bac04f831b9c843fa3ebc, type: 3}
-  bossPrefab: {fileID: 0}
+  bossPrefab: {fileID: 7967948691622289222, guid: 5f7abe4682e9d8540ae6953416311fe9, type: 3}
   targetEnemyCount: 6
   minDistanceFromPlayer: 3.5
 --- !u!4 &89746293
@@ -2748,8 +2748,8 @@ PolygonCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.28866667}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 3.54, y: 4.97}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -2837,10 +2837,10 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+  m_Sprite: {fileID: 4794571953300236220, guid: a552e7d144936eb42905241eb45689c9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
-  m_FlipY: 1
+  m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
@@ -2857,8 +2857,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 0.7, z: 0.7}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.3, y: 0.21000001, z: 0.21000001}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1496633161}
   m_Father: {fileID: 0}
@@ -5209,54 +5209,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1843518065
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1843518067}
-  - component: {fileID: 1843518066}
-  m_Layer: 0
-  m_Name: SnakeBossController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1843518066
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1843518065}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c912788ab5da830458d7af31d033c4a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SnakeBossController
-  segmentPrefab: {fileID: 1998247571571582198, guid: db3c08aeadf6e3c469b697dc1e64864d, type: 3}
-  totalSegments: 6
-  segmentSpacing: 1.2
-  moveSpeed: 4
---- !u!4 &1843518067
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1843518065}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.92, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1857320820
 GameObject:
   m_ObjectHideFlags: 0
@@ -6213,4 +6165,3 @@ SceneRoots:
   - {fileID: 89746293}
   - {fileID: 1836053073}
   - {fileID: 2101830651}
-  - {fileID: 1843518067}
